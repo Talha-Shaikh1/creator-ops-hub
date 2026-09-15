@@ -1,69 +1,170 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState, useCallback } from "react";
+import { Navbar } from "@/components/Navbar";
+import { MissionTab } from "@/components/MissionTab";
+import { RotationTab } from "@/components/RotationTab";
+import { GmailVaultTab } from "@/components/GmailVaultTab";
+import { HistoryTab } from "@/components/HistoryTab";
+import { SettingsTab } from "@/components/SettingsTab";
+import { RefreshCw } from "lucide-react";
+
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState("mission");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Data states
+  const [todayData, setTodayData] = useState<any>(null);
+  const [personas, setPersonas] = useState<any[]>([]);
+  const [gmailAccounts, setGmailAccounts] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
+
+  // Helper for PKT day of week
+  const [pktDayOfWeek, setPktDayOfWeek] = useState<number>(1);
+  const [pktDateStr, setPktDateStr] = useState<string>("");
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [uploadsRes, personasRes, gmailRes, statsRes, settingsRes] =
+        await Promise.all([
+          fetch("/api/uploads"),
+          fetch("/api/personas"),
+          fetch("/api/gmail"),
+          fetch("/api/stats"),
+          fetch("/api/settings"),
+        ]);
+
+      if (uploadsRes.ok) {
+        const u = await uploadsRes.json();
+        setTodayData(u);
+        setPktDateStr(u.date);
+      }
+      if (personasRes.ok) {
+        const p = await personasRes.json();
+        setPersonas(p);
+      }
+      if (gmailRes.ok) {
+        const g = await gmailRes.json();
+        setGmailAccounts(g);
+      }
+      if (statsRes.ok) {
+        const s = await statsRes.json();
+        setStats(s);
+      }
+      if (settingsRes.ok) {
+        const st = await settingsRes.json();
+        setSettings(st);
+      }
+    } catch (err) {
+      console.error("Failed to load dashboard data", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    // Determine PKT day of week
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Karachi",
+      weekday: "short",
+    });
+    const dayStr = formatter.format(new Date());
+    const dayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+    setPktDayOfWeek(dayMap[dayStr] ?? 1);
+  }, [fetchData]);
+
+  const activePersonaName =
+    todayData?.todayUpload?.persona?.name ||
+    todayData?.scheduledPersona?.name;
+
+  const isAllCompleted =
+    Boolean(todayData?.todayUpload?.allCompleted) ||
+    (Boolean(todayData?.todayUpload?.youtubeDone) &&
+      Boolean(todayData?.todayUpload?.instaDone) &&
+      Boolean(todayData?.todayUpload?.tiktokDone) &&
+      Boolean(todayData?.todayUpload?.facebookDone));
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen bg-[#090a0f] text-neutral-100 flex flex-col">
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        activeBrandName={activePersonaName}
+        isAllCompleted={isAllCompleted}
+        streakCount={stats?.currentStreak || 0}
+      />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center animate-spin">
+              <RefreshCw className="w-5 h-5" />
+            </div>
+            <p className="text-sm text-neutral-400 font-medium">
+              Synchronizing CreatorOps Hub pipeline...
+            </p>
+          </div>
+        ) : (
+          <div>
+            {activeTab === "mission" && (
+              <MissionTab
+                todayUpload={todayData?.todayUpload || null}
+                scheduledPersona={todayData?.scheduledPersona || null}
+                currentDateStr={pktDateStr}
+                onRefresh={fetchData}
+              />
+            )}
+
+            {activeTab === "rotation" && (
+              <RotationTab
+                personas={personas}
+                gmailAccounts={gmailAccounts}
+                currentPKTDayOfWeek={pktDayOfWeek}
+                onRefresh={fetchData}
+              />
+            )}
+
+            {activeTab === "gmail" && (
+              <GmailVaultTab
+                gmailAccounts={gmailAccounts}
+                onRefresh={fetchData}
+              />
+            )}
+
+            {activeTab === "history" && (
+              <HistoryTab stats={stats} onRefresh={fetchData} />
+            )}
+
+            {activeTab === "settings" && (
+              <SettingsTab settings={settings} onRefresh={fetchData} />
+            )}
+          </div>
+        )}
       </main>
+
+      <footer className="border-t border-[#181c28] bg-[#0b0d14] py-4 text-center text-xs text-neutral-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 font-medium text-neutral-400">
+            <span>CreatorOps Hub</span>
+            <span>•</span>
+            <span className="text-emerald-400">Asia/Karachi UTC+5</span>
+          </div>
+          <span>
+            CallMeBot WhatsApp Rotation & Content Operations Dashboard
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

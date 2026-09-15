@@ -1,0 +1,68 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Persona {
+  id              String   @id @default(cuid())
+  name            String   @unique // e.g. "objitoon", "aayla.khan.uk"
+  assignedDay     Int?     // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  gmailAccountId  String?
+  gmailAccount    GmailAccount? @relation(fields: [gmailAccountId], references: [id], onDelete: SetNull)
+  youtubeHandle   String?
+  youtubeUrl      String?
+  instaHandle     String?
+  instaUrl        String?
+  tiktokHandle    String?
+  tiktokUrl       String?
+  facebookHandle  String?
+  facebookUrl     String?
+  dailyUploads    DailyUpload[]
+  createdAt       DateTime @default(now())
+}
+
+model GmailAccount {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  subscription    String   @default("Free") // "Gemini Pro", "ChatGPT Plus", "Free"
+  renewalDate     DateTime?
+  browserProfile  String?  // e.g. "Profile 1"
+  notes           String?
+  personas        Persona[]
+  createdAt       DateTime @default(now())
+}
+
+model DailyUpload {
+  id              String   @id @default(cuid())
+  date            String   // "YYYY-MM-DD" in PKT
+  personaId       String
+  persona         Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  videoTitle      String?
+  notes           String?
+  youtubeDone     Boolean  @default(false)
+  instaDone       Boolean  @default(false)
+  tiktokDone      Boolean  @default(false)
+  facebookDone    Boolean  @default(false)
+  youtubeUrl      String?
+  instaUrl        String?
+  tiktokUrl       String?
+  facebookUrl     String?
+  allCompleted    Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  @@unique([date, personaId])
+}
+
+model SystemSettings {
+  id                String   @id @default("default")
+  whatsappPhone     String?
+  callmebotApiKey   String?
+  cronSecret        String?
+  startHourPKT      Int      @default(14) // 2:00 PM
+  endHourPKT        Int      @default(23) // 11:00 PM
+  appUrl            String?
+}
