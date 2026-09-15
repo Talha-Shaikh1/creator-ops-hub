@@ -11,7 +11,10 @@ export async function GET() {
       settings = await prisma.systemSettings.create({
         data: {
           id: "default",
+          provider: "greenapi",
           whatsappPhone: process.env.WHATSAPP_PHONE || "923001234567",
+          greenApiIdInstance: process.env.GREEN_API_ID_INSTANCE || "",
+          greenApiApiToken: process.env.GREEN_API_API_TOKEN || "",
           callmebotApiKey: process.env.CALLMEBOT_API_KEY || "123456",
           cronSecret:
             process.env.CRON_SECRET || "creatorops_super_secret_cron_token_2025",
@@ -36,7 +39,10 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const {
+      provider,
       whatsappPhone,
+      greenApiIdInstance,
+      greenApiApiToken,
       callmebotApiKey,
       cronSecret,
       startHourPKT,
@@ -47,7 +53,10 @@ export async function PUT(req: NextRequest) {
     const updated = await prisma.systemSettings.upsert({
       where: { id: "default" },
       update: {
+        ...(provider !== undefined ? { provider } : {}),
         ...(whatsappPhone !== undefined ? { whatsappPhone } : {}),
+        ...(greenApiIdInstance !== undefined ? { greenApiIdInstance } : {}),
+        ...(greenApiApiToken !== undefined ? { greenApiApiToken } : {}),
         ...(callmebotApiKey !== undefined ? { callmebotApiKey } : {}),
         ...(cronSecret !== undefined ? { cronSecret } : {}),
         ...(startHourPKT !== undefined
@@ -60,7 +69,10 @@ export async function PUT(req: NextRequest) {
       },
       create: {
         id: "default",
+        provider: provider || "greenapi",
         whatsappPhone: whatsappPhone || null,
+        greenApiIdInstance: greenApiIdInstance || null,
+        greenApiApiToken: greenApiApiToken || null,
         callmebotApiKey: callmebotApiKey || null,
         cronSecret: cronSecret || "creatorops_super_secret_cron_token_2025",
         startHourPKT: startHourPKT ? parseInt(startHourPKT, 10) : 14,

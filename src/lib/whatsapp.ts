@@ -32,7 +32,67 @@ ${data.appUrl}
 ━━━━━━━━━━━━━━━━━━`;
 }
 
-export async function sendWhatsAppAlert({
+/**
+ * Green-API WhatsApp Dispatcher (Zero-block, instant cloud instance)
+ */
+export async function sendGreenApiAlert({
+  idInstance,
+  apiToken,
+  phone,
+  message,
+}: {
+  idInstance: string;
+  apiToken: string;
+  phone: string;
+  message: string;
+}): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    const cleanPhone = phone.replace(/[^0-9]/g, "");
+    if (!cleanPhone) {
+      return { success: false, error: "Invalid recipient phone number" };
+    }
+    if (!idInstance || !apiToken) {
+      return {
+        success: false,
+        error: "Green-API idInstance and apiTokenInstance are required.",
+      };
+    }
+
+    const url = `https://api.green-api.com/waInstance${idInstance.trim()}/sendMessage/${apiToken.trim()}`;
+    const chatId = `${cleanPhone}@c.us`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatId,
+        message,
+      }),
+    });
+
+    const resData = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return {
+        success: false,
+        error: resData.message || `Green-API HTTP ${res.status}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: JSON.stringify(resData),
+    };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * CallMeBot WhatsApp Dispatcher
+ */
+export async function sendCallMeBotAlert({
   phone,
   apiKey,
   message,
@@ -52,7 +112,7 @@ export async function sendWhatsAppAlert({
 
     const encodedText = encodeURIComponent(message);
     const url = `https://api.callmebot.com/whatsapp.php?phone=${cleanPhone}&text=${encodedText}&apikey=${encodeURIComponent(
-      apiKey
+      apiKey.trim()
     )}`;
 
     const response = await fetch(url, {
@@ -82,4 +142,45 @@ export async function sendWhatsAppAlert({
       error: errorMsg,
     };
   }
+}
+
+/**
+ * Unified Dispatcher based on chosen Provider
+ */
+export async function sendWhatsAppNotification({
+  provider = "greenapi",
+  phone,
+  callmebotApiKey,
+  greenApiIdInstance,
+  greenApiApiToken,
+  message,
+}: {
+  provider?: string;
+  phone: string;
+  callmebotApiKey?: string | null;
+  greenApiIdInstance?: string | null;
+  greenApiApiToken?: string | null;
+  message: string;
+}) {
+  if (provider === "greenapi") {
+    if (!greenApiIdInstance || !greenApiApiToken) {
+      return {
+        success: false,
+        error:
+          "Green-API is selected, but idInstance or apiTokenInstance is missing in Settings.",
+      };
+    }
+    return sendGreenApiAlert({
+      idInstance: greenApiIdInstance,
+      apiToken: greenApiApiToken,
+      phone,
+      message,
+    });
+  }
+
+  return sendCallMeBotAlert({
+    phone,
+    apiKey: callmebotApiKey || "",
+    message,
+  });
 }

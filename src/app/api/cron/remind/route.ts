@@ -6,7 +6,7 @@ import {
   getPKTDayOfWeek,
   getPKTTimeString,
 } from "@/lib/time";
-import { formatWhatsAppMessage, sendWhatsAppAlert } from "@/lib/whatsapp";
+import { formatWhatsAppMessage, sendWhatsAppNotification } from "@/lib/whatsapp";
 
 export async function GET(req: NextRequest) {
   return handleRemind(req);
@@ -126,19 +126,17 @@ async function handleRemind(req: NextRequest) {
     // 7. If pending, send WhatsApp reminder
     const phone =
       settings?.whatsappPhone || process.env.WHATSAPP_PHONE || "";
-    const apiKey =
-      settings?.callmebotApiKey || process.env.CALLMEBOT_API_KEY || "";
+    const provider = settings?.provider || "greenapi";
     const appUrl =
       settings?.appUrl ||
       process.env.NEXT_PUBLIC_APP_URL ||
       req.nextUrl.origin ||
       "http://localhost:3000";
 
-    if (!phone || !apiKey) {
+    if (!phone) {
       return NextResponse.json({
         status: "error",
-        message:
-          "WhatsApp phone or CallMeBot API key not configured in SystemSettings or environment variables.",
+        message: "WhatsApp phone not configured in SystemSettings.",
         brand: activePersona.name,
       });
     }
@@ -153,9 +151,14 @@ async function handleRemind(req: NextRequest) {
       currentTimeStr: timeFormatted,
     });
 
-    const result = await sendWhatsAppAlert({
+    const result = await sendWhatsAppNotification({
+      provider,
       phone,
-      apiKey,
+      callmebotApiKey: settings?.callmebotApiKey || process.env.CALLMEBOT_API_KEY,
+      greenApiIdInstance:
+        settings?.greenApiIdInstance || process.env.GREEN_API_ID_INSTANCE,
+      greenApiApiToken:
+        settings?.greenApiApiToken || process.env.GREEN_API_API_TOKEN,
       message,
     });
 
@@ -174,6 +177,7 @@ async function handleRemind(req: NextRequest) {
       status: "sent",
       sent_to: phone,
       brand: activePersona.name,
+      provider,
       time: timeFormatted,
       dailyUploadStatus: {
         youtube: dailyUpload.youtubeDone,
@@ -181,7 +185,7 @@ async function handleRemind(req: NextRequest) {
         tiktok: dailyUpload.tiktokDone,
         facebook: dailyUpload.facebookDone,
       },
-      callmebotResponse: result.data,
+      response: result.data,
     });
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : String(error);

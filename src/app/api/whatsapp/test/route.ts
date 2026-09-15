@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendWhatsAppAlert } from "@/lib/whatsapp";
+import { sendWhatsAppNotification } from "@/lib/whatsapp";
 import { getPKTTimeString } from "@/lib/time";
 
 export async function POST(req: NextRequest) {
@@ -10,19 +10,30 @@ export async function POST(req: NextRequest) {
       where: { id: "default" },
     });
 
+    const provider = body.provider || settings?.provider || "greenapi";
     const phone =
       body.phone || settings?.whatsappPhone || process.env.WHATSAPP_PHONE || "";
-    const apiKey =
-      body.apiKey ||
+    const callmebotApiKey =
+      body.callmebotApiKey ||
       settings?.callmebotApiKey ||
       process.env.CALLMEBOT_API_KEY ||
       "";
+    const greenApiIdInstance =
+      body.greenApiIdInstance ||
+      settings?.greenApiIdInstance ||
+      process.env.GREEN_API_ID_INSTANCE ||
+      "";
+    const greenApiApiToken =
+      body.greenApiApiToken ||
+      settings?.greenApiApiToken ||
+      process.env.GREEN_API_API_TOKEN ||
+      "";
 
-    if (!phone || !apiKey) {
+    if (!phone) {
       return NextResponse.json(
         {
           success: false,
-          error: "Phone number and CallMeBot API Key are required.",
+          error: "Recipient WhatsApp phone number is required.",
         },
         { status: 400 }
       );
@@ -31,17 +42,21 @@ export async function POST(req: NextRequest) {
     const timeStr = getPKTTimeString();
     const testMessage = `🚀 *CreatorOps Hub: WhatsApp Integration Test*
 ━━━━━━━━━━━━━━━━━━
-Salam Bhai! CallMeBot WhatsApp connection test was successful!
+Salam Bhai! WhatsApp connection test was 100% successful!
 
 ⏰ *PKT Time:* ${timeStr}
-⚡ *Status:* Operational & Ready for Hourly Reminders
+⚡ *Engine:* ${provider === "greenapi" ? "Green-API (Instant Cloud)" : "CallMeBot"}
+✅ *Status:* Operational & Ready for Hourly Reminders
 
 Let's crush the upload targets today! 💪
 ━━━━━━━━━━━━━━━━━━`;
 
-    const result = await sendWhatsAppAlert({
+    const result = await sendWhatsAppNotification({
+      provider,
       phone,
-      apiKey,
+      callmebotApiKey,
+      greenApiIdInstance,
+      greenApiApiToken,
       message: testMessage,
     });
 
@@ -57,9 +72,12 @@ Let's crush the upload targets today! 💪
 
     return NextResponse.json({
       success: true,
-      message: "WhatsApp test alert dispatched successfully!",
+      message: `WhatsApp test alert dispatched successfully via ${
+        provider === "greenapi" ? "Green-API" : "CallMeBot"
+      }!`,
       phone,
-      callmebotResponse: result.data,
+      provider,
+      response: result.data,
     });
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : String(error);

@@ -58,11 +58,14 @@ model DailyUpload {
 }
 
 model SystemSettings {
-  id                String   @id @default("default")
-  whatsappPhone     String?
-  callmebotApiKey   String?
-  cronSecret        String?
-  startHourPKT      Int      @default(14) // 2:00 PM
-  endHourPKT        Int      @default(23) // 11:00 PM
-  appUrl            String?
+  id                  String   @id @default("default")
+  provider            String   @default("greenapi") // "greenapi" | "callmebot"
+  whatsappPhone       String?
+  callmebotApiKey     String?
+  greenApiIdInstance  String?
+  greenApiApiToken    String?
+  cronSecret          String?
+  startHourPKT        Int      @default(14) // 2:00 PM
+  endHourPKT          Int      @default(23) // 11:00 PM
+  appUrl              String?
 }
