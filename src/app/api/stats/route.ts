@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPKTPastDays, getPKTDateString } from "@/lib/time";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const pastDays = getPKTPastDays(28); // 4 weeks

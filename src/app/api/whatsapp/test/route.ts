@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppNotification } from "@/lib/whatsapp";
 import { getPKTTimeString } from "@/lib/time";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));

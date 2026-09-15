@@ -8,6 +8,8 @@ import {
 } from "@/lib/time";
 import { formatWhatsAppMessage, sendWhatsAppNotification } from "@/lib/whatsapp";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   return handleRemind(req);
 }
