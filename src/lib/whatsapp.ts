@@ -6,6 +6,11 @@ export interface ReminderData {
   instaDone: boolean;
   tiktokDone: boolean;
   facebookDone: boolean;
+  storiesDone?: number;
+  storiesTarget?: number;
+  feedPostsDone?: number;
+  feedPostsTarget?: number;
+  niche?: string | null;
   appUrl: string;
   currentTimeStr?: string;
 }
@@ -17,19 +22,34 @@ export function formatWhatsAppMessage(data: ReminderData): string {
   const tiktokStatus = data.tiktokDone ? "✅" : "❌";
   const fbStatus = data.facebookDone ? "✅" : "❌";
 
-  return `🔔 *CreatorOps Alert (PKT Time: ${time})*
-━━━━━━━━━━━━━━━━━━
-Bhai! Aaj *${data.brandName}* ki bari hai video upload karne ki!
+  const storiesDone = data.storiesDone ?? 0;
+  const storiesTarget = data.storiesTarget ?? 5;
+  const feedDone = data.feedPostsDone ?? 0;
+  const feedTarget = data.feedPostsTarget ?? 4;
 
-📊 *Status:*
-${ytStatus} YouTube
-${instaStatus} Instagram
-${tiktokStatus} TikTok
-${fbStatus} Facebook
+  const storiesStatus = storiesDone >= storiesTarget ? "✅" : "⏳";
+  const feedStatus = feedDone >= feedTarget ? "✅" : "⏳";
 
-🔗 Open Dashboard to mark done:
+  return `🔔 *CreatorOps Daily Content Alert (PKT: ${time})*
+━━━━━━━━━━━━━━━━━━━━
+Bhai! Aaj *@${data.brandName}* ke daily tasks complete karne ka time hai!
+
+🎬 *Today's Reel (4 Platforms):*
+  ${ytStatus} YouTube Shorts
+  ${instaStatus} Instagram Reel
+  ${tiktokStatus} TikTok
+  ${fbStatus} Facebook Video
+
+📱 *Daily Stories (IG & FB):*
+  ${storiesStatus} ${storiesDone}/${storiesTarget} Stories Uploaded
+
+🖼️ *Weekly Feed Posts / Carousels:*
+  ${feedStatus} ${feedDone}/${feedTarget} Posts This Week
+
+⚡ *AI Content Studio:*
+Open dashboard for 1-click script, hook, prompts & platform copy:
 ${data.appUrl}
-━━━━━━━━━━━━━━━━━━`;
+━━━━━━━━━━━━━━━━━━━━`;
 }
 
 /**

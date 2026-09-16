@@ -143,12 +143,41 @@ async function handleRemind(req: NextRequest) {
       });
     }
 
+    // Calculate weekly feed posts for this persona
+    const todayDate = new Date(todayStr);
+    const day = todayDate.getDay();
+    const diffToMon = todayDate.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(todayDate.setDate(diffToMon));
+    const weekDates: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      weekDates.push(d.toISOString().slice(0, 10));
+    }
+
+    const weeklyUploads = await prisma.dailyUpload.findMany({
+      where: {
+        personaId: activePersona.id,
+        date: { in: weekDates },
+      },
+    });
+
+    const totalFeedPostsThisWeek = weeklyUploads.reduce(
+      (acc, curr) => acc + (curr.feedPostsCount || 0),
+      0
+    );
+
     const message = formatWhatsAppMessage({
       brandName: activePersona.name,
       youtubeDone: dailyUpload.youtubeDone,
       instaDone: dailyUpload.instaDone,
       tiktokDone: dailyUpload.tiktokDone,
       facebookDone: dailyUpload.facebookDone,
+      storiesDone: dailyUpload.storiesCount || 0,
+      storiesTarget: activePersona.dailyStoriesTarget || 5,
+      feedPostsDone: totalFeedPostsThisWeek,
+      feedPostsTarget: activePersona.weeklyFeedTarget || 4,
+      niche: activePersona.niche,
       appUrl,
       currentTimeStr: timeFormatted,
     });

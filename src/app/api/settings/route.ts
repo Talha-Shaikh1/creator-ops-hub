@@ -18,6 +18,7 @@ export async function GET() {
           greenApiIdInstance: process.env.GREEN_API_ID_INSTANCE || "",
           greenApiApiToken: process.env.GREEN_API_API_TOKEN || "",
           callmebotApiKey: process.env.CALLMEBOT_API_KEY || "123456",
+          geminiApiKey: process.env.GEMINI_API_KEY || null,
           cronSecret:
             process.env.CRON_SECRET || "creatorops_super_secret_cron_token_2025",
           startHourPKT: 14,
@@ -46,6 +47,7 @@ export async function PUT(req: NextRequest) {
       greenApiIdInstance,
       greenApiApiToken,
       callmebotApiKey,
+      geminiApiKey,
       cronSecret,
       startHourPKT,
       endHourPKT,
@@ -60,6 +62,7 @@ export async function PUT(req: NextRequest) {
         ...(greenApiIdInstance !== undefined ? { greenApiIdInstance } : {}),
         ...(greenApiApiToken !== undefined ? { greenApiApiToken } : {}),
         ...(callmebotApiKey !== undefined ? { callmebotApiKey } : {}),
+        ...(geminiApiKey !== undefined ? { geminiApiKey } : {}),
         ...(cronSecret !== undefined ? { cronSecret } : {}),
         ...(startHourPKT !== undefined
           ? { startHourPKT: parseInt(startHourPKT, 10) }
@@ -76,6 +79,7 @@ export async function PUT(req: NextRequest) {
         greenApiIdInstance: greenApiIdInstance || null,
         greenApiApiToken: greenApiApiToken || null,
         callmebotApiKey: callmebotApiKey || null,
+        geminiApiKey: geminiApiKey || null,
         cronSecret: cronSecret || "creatorops_super_secret_cron_token_2025",
         startHourPKT: startHourPKT ? parseInt(startHourPKT, 10) : 14,
         endHourPKT: endHourPKT ? parseInt(endHourPKT, 10) : 23,

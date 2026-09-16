@@ -169,23 +169,36 @@ Return a strictly valid JSON object matching this schema:
 
 Do not include markdown code block backticks. Return only valid JSON.`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" },
-    }),
-  });
+  const modelsToTry = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-pro-latest"];
+  let responseText = null;
 
-  if (!response.ok) {
-    throw new Error(`Gemini API returned ${response.status}: ${await response.text()}`);
+  for (const model of modelsToTry) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" },
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (responseText) break;
+      }
+    } catch (e) {
+      // try next model
+    }
   }
 
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  return JSON.parse(text);
+  if (!responseText) {
+    throw new Error("Gemini models could not be reached");
+  }
+
+  return JSON.parse(responseText);
 }
 
 function generateWithSmartEngine(

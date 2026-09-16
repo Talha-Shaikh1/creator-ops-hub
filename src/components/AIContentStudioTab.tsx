@@ -258,6 +258,20 @@ export function AIContentStudioTab({
     { id: "photo dump", label: "Multi-Image Photo Dump" },
   ];
 
+  if (personas.length === 0) {
+    return (
+      <div className="rounded-2xl bg-[#11131c] border border-[#1f2436] p-8 sm:p-12 text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+          <Sparkles className="w-6 h-6" />
+        </div>
+        <h3 className="text-lg font-bold text-white">No AI Influencer Personas Added Yet</h3>
+        <p className="text-xs text-neutral-400 max-w-md mx-auto">
+          Add your 4 original accounts in the <strong>Brand Rotation</strong> tab to start generating 7-step daily operations packs, viral hooks, scripts, and platform copy.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* TOP CONTROLS & PERSONA SELECTOR */}

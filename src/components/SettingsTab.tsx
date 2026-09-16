@@ -52,6 +52,9 @@ export function SettingsTab({ settings, onRefresh }: SettingsTabProps) {
   const [callmebotApiKey, setCallmebotApiKey] = useState(
     settings?.callmebotApiKey || ""
   );
+  const [geminiApiKey, setGeminiApiKey] = useState(
+    (settings as any)?.geminiApiKey || ""
+  );
   const [cronSecret, setCronSecret] = useState(settings?.cronSecret || "");
   const [startHourPKT, setStartHourPKT] = useState(
     String(settings?.startHourPKT ?? 14)
@@ -97,6 +100,7 @@ export function SettingsTab({ settings, onRefresh }: SettingsTabProps) {
           greenApiIdInstance,
           greenApiApiToken,
           callmebotApiKey,
+          geminiApiKey,
           cronSecret,
           startHourPKT,
           endHourPKT,
@@ -394,6 +398,32 @@ jobs:
                   </div>
                 </div>
               )}
+
+              {/* Gemini API Key */}
+              <div className="p-3.5 rounded-xl bg-gradient-to-r from-indigo-950/30 to-purple-950/20 border border-indigo-500/30">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-indigo-300 flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    Google Gemini AI API Key (AI Content Studio)
+                  </label>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-mono">
+                    Optional / Pro
+                  </span>
+                </div>
+                <p className="text-[11px] text-neutral-400 mb-2">
+                  Powers dynamic AI script generation, viral hooks, and SEO descriptions in the AI Content Studio. (If empty, smart built-in engine is used).
+                </p>
+                <div className="relative">
+                  <Key className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    value={geminiApiKey}
+                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#10121d] border border-[#252c42] text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
 
               {/* Cron Secret */}
               <div>
