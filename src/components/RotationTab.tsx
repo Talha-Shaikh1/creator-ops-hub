@@ -23,6 +23,15 @@ interface Persona {
   id: string;
   name: string;
   assignedDay: number | null;
+  niche?: string | null;
+  language?: string | null;
+  targetAudience?: string | null;
+  visualStyle?: string | null;
+  framePrompt?: string | null;
+  masterVideoPrompt?: string | null;
+  weeklyReelsTarget?: number;
+  weeklyFeedTarget?: number;
+  dailyStoriesTarget?: number;
   youtubeHandle?: string | null;
   youtubeUrl?: string | null;
   instaHandle?: string | null;
@@ -82,6 +91,15 @@ export function RotationTab({
       name: p.name,
       assignedDay: p.assignedDay,
       gmailAccountId: p.gmailAccountId,
+      niche: p.niche || "",
+      language: p.language || "English",
+      targetAudience: p.targetAudience || "",
+      visualStyle: p.visualStyle || "",
+      framePrompt: p.framePrompt || "",
+      masterVideoPrompt: p.masterVideoPrompt || "",
+      weeklyReelsTarget: p.weeklyReelsTarget || 3,
+      weeklyFeedTarget: p.weeklyFeedTarget || 4,
+      dailyStoriesTarget: p.dailyStoriesTarget || 5,
       youtubeHandle: p.youtubeHandle || "",
       youtubeUrl: p.youtubeUrl || "",
       instaHandle: p.instaHandle || "",
@@ -220,16 +238,28 @@ export function RotationTab({
                     <h4 className="text-base font-bold text-white flex items-center gap-1.5">
                       <span>@{p.name}</span>
                     </h4>
-                    <span className="text-xs text-neutral-400 font-medium">
-                      Assigned:{" "}
-                      <strong
-                        className={
-                          isToday ? "text-emerald-400" : "text-neutral-300"
-                        }
-                      >
-                        {dayName}
-                      </strong>
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <span className="text-xs text-neutral-400 font-medium">
+                        Assigned:{" "}
+                        <strong
+                          className={
+                            isToday ? "text-emerald-400" : "text-neutral-300"
+                          }
+                        >
+                          {dayName}
+                        </strong>
+                      </span>
+                      {p.language && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">
+                          {p.language}
+                        </span>
+                      )}
+                    </div>
+                    {p.niche && (
+                      <p className="text-[11px] text-neutral-400 truncate max-w-xs mt-1">
+                        {p.niche}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1">

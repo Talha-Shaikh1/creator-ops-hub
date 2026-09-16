@@ -8,32 +8,42 @@ generator client {
 }
 
 model Persona {
-  id              String   @id @default(cuid())
-  name            String   @unique // e.g. "objitoon", "aayla.khan.uk"
-  assignedDay     Int?     // 0 = Sunday, 1 = Monday, ... 6 = Saturday
-  gmailAccountId  String?
-  gmailAccount    GmailAccount? @relation(fields: [gmailAccountId], references: [id], onDelete: SetNull)
-  youtubeHandle   String?
-  youtubeUrl      String?
-  instaHandle     String?
-  instaUrl        String?
-  tiktokHandle    String?
-  tiktokUrl       String?
-  facebookHandle  String?
-  facebookUrl     String?
-  dailyUploads    DailyUpload[]
-  createdAt       DateTime @default(now())
+  id                 String              @id @default(cuid())
+  name               String              @unique // e.g. "objitoon", "aayla.khan.uk"
+  assignedDay        Int?                // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  niche              String?             // e.g. "relationships + mindset, UK/Europe audience"
+  language           String?             @default("English") // "English", "Roman Urdu / Hinglish", "Urdu"
+  targetAudience     String?             // e.g. "UK/Europe 18-35 females", "Pakistan/India youth"
+  visualStyle        String?             // e.g. "Warm cinematic, soft brown tones, minimal aesthetic"
+  framePrompt        String?             // e.g. "Saved frame image generation prompt template"
+  masterVideoPrompt  String?             // e.g. "Master video generation prompt"
+  weeklyReelsTarget  Int                 @default(3)
+  weeklyFeedTarget   Int                 @default(4)
+  dailyStoriesTarget Int                 @default(5)
+  gmailAccountId     String?
+  gmailAccount       GmailAccount?       @relation(fields: [gmailAccountId], references: [id], onDelete: SetNull)
+  youtubeHandle      String?
+  youtubeUrl         String?
+  instaHandle        String?
+  instaUrl           String?
+  tiktokHandle       String?
+  tiktokUrl          String?
+  facebookHandle     String?
+  facebookUrl        String?
+  dailyUploads       DailyUpload[]
+  contentPlans       DailyContentPlan[]
+  createdAt          DateTime            @default(now())
 }
 
 model GmailAccount {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  subscription    String   @default("Free") // "Gemini Pro", "ChatGPT Plus", "Free"
+  id              String    @id @default(cuid())
+  email           String    @unique
+  subscription    String    @default("Free") // "Gemini Pro", "ChatGPT Plus", "Free"
   renewalDate     DateTime?
-  browserProfile  String?  // e.g. "Profile 1"
+  browserProfile  String?   // e.g. "Profile 1"
   notes           String?
   personas        Persona[]
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 }
 
 model DailyUpload {
@@ -52,7 +62,37 @@ model DailyUpload {
   tiktokUrl       String?
   facebookUrl     String?
   allCompleted    Boolean  @default(false)
+  feedPostsCount  Int      @default(0)
+  storiesCount    Int      @default(0)
   updatedAt       DateTime @updatedAt
+
+  @@unique([date, personaId])
+}
+
+model DailyContentPlan {
+  id               String   @id @default(cuid())
+  date             String   // "YYYY-MM-DD"
+  personaId        String
+  persona          Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  trendingTopic    String?
+  trendingAudio    String?
+  hook             String?
+  reelScript       String?
+  imagePostType    String?  // "casual candid", "OOTD/mirror", "podcast BTS", "flatlay", "quote-over-photo", "carousel", "photo dump"
+  imagePrompt      String?
+  carouselSlides   String?  // JSON string
+  storiesPlan      String?  // JSON string
+  ytTitle          String?
+  ytDescription    String?
+  ytTags           String?
+  tiktokCaption    String?
+  tiktokHashtags   String?
+  instaCaption     String?
+  instaHashtags    String?
+  facebookCaption  String?
+  facebookHashtags String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@unique([date, personaId])
 }
@@ -64,6 +104,7 @@ model SystemSettings {
   callmebotApiKey     String?
   greenApiIdInstance  String?
   greenApiApiToken    String?
+  geminiApiKey        String?
   cronSecret          String?
   startHourPKT        Int      @default(14) // 2:00 PM
   endHourPKT          Int      @default(23) // 11:00 PM

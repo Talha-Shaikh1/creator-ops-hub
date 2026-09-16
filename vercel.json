@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/remind?token=creatorops_super_secret_cron_token_2025",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

@@ -51,3 +51,24 @@ export function TikTokIcon({ className = "w-4 h-4 text-cyan-400" }: { className?
     </svg>
   );
 }
+
+export function SocialIcon({
+  platform,
+  className,
+}: {
+  platform: "youtube" | "instagram" | "facebook" | "tiktok" | string;
+  className?: string;
+}) {
+  switch (platform.toLowerCase()) {
+    case "youtube":
+      return <YouTubeIcon className={className || "w-4 h-4 text-red-500"} />;
+    case "instagram":
+      return <InstagramIcon className={className || "w-4 h-4 text-pink-500"} />;
+    case "facebook":
+      return <FacebookIcon className={className || "w-4 h-4 text-blue-400"} />;
+    case "tiktok":
+      return <TikTokIcon className={className || "w-4 h-4 text-cyan-400"} />;
+    default:
+      return null;
+  }
+}

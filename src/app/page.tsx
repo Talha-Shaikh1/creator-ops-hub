@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Navbar } from "@/components/Navbar";
 import { MissionTab } from "@/components/MissionTab";
+import { AIContentStudioTab } from "@/components/AIContentStudioTab";
 import { RotationTab } from "@/components/RotationTab";
 import { GmailVaultTab } from "@/components/GmailVaultTab";
 import { HistoryTab } from "@/components/HistoryTab";
@@ -123,6 +124,15 @@ export default function DashboardPage() {
                 scheduledPersona={todayData?.scheduledPersona || null}
                 currentDateStr={pktDateStr}
                 onRefresh={fetchData}
+              />
+            )}
+
+            {activeTab === "studio" && (
+              <AIContentStudioTab
+                personas={personas}
+                currentDateStr={pktDateStr}
+                currentPKTDayOfWeek={pktDayOfWeek}
+                onRefreshAll={fetchData}
               />
             )}
 

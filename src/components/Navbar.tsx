@@ -47,7 +47,8 @@ export function Navbar({
   }, []);
 
   const navItems = [
-    { id: "mission", label: "Today's Mission", icon: Sparkles },
+    { id: "mission", label: "Today's Mission", icon: CheckCircle2 },
+    { id: "studio", label: "AI Content Studio", icon: Sparkles },
     { id: "rotation", label: "Brand Rotation", icon: Radio },
     { id: "gmail", label: "Gmail & AI Vault", icon: Bot },
     { id: "history", label: "Streak & History", icon: CalendarDays },
